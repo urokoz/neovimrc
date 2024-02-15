@@ -16,9 +16,6 @@ return {
     opts = { use_diagnostic_signs = true },
   },
 
-  -- disable trouble
-  { "folke/trouble.nvim", enabled = false },
-
   -- add symbols-outline
   {
     "simrat39/symbols-outline.nvim",
@@ -115,10 +112,33 @@ return {
   -- the opts function can also be used to change the default opts:
   {
     "nvim-lualine/lualine.nvim",
-    event = "VeryLazy",
-    opts = function(_, opts)
-      table.insert(opts.sections.lualine_x, "😄")
-    end,
+	  dependencies = { "nvim-tree/nvim-web-devicons" },
+	  config = function()
+		  local lualine = require("lualine")
+
+		  lualine.setup({
+			  options = {
+				  theme = "rose-pine",
+				  globalstatus = true,
+			  },
+			  sections = {
+				  lualine_c = {},
+			  },
+		  })
+      local lualine_nvim_opts = require 'lualine.utils.nvim_opts'
+      local base_set = lualine_nvim_opts.set
+
+      lualine_nvim_opts.set = function(name, val, scope)
+        if vim.env.TMUX ~= nil and name == 'statusline' then
+          if scope and scope.window == vim.api.nvim_get_current_win() then
+            vim.g.tpipeline_statusline = val
+            vim.cmd 'silent! call tpipeline#update()'
+          end
+          return
+        end
+        return base_set(name, val, scope)
+      end
+	  end,
   },
 
   -- use mini.starter instead of alpha
